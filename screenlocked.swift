@@ -1,7 +1,6 @@
 #!/usr/bin/env swift
 
 import Cocoa
-import Darwin
 
 // 状态枚举 + 退出码映射
 enum LockStatus: Int32 {
