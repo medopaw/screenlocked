@@ -1,0 +1,66 @@
+name: Release
+on:
+  push:
+    tags:
+      - 'v*' # 当推送以 'v' 开头的标签时触发
+jobs:
+  build-and-publish:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    continue-on-error: false
+    steps:
+      - name: Validate version
+        run: |
+          if ! [[ "${{ github.ref_name }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid version format"
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - name: Build Universal Binary
+        run: |
+          swiftc -O -target x86_64-apple-macosx11.0 -o screenlocked_x86 screenlocked.swift
+          swiftc -O -target arm64-apple-macosx11.0 -o screenlocked_arm screenlocked.swift
+          lipo -create -output screenlocked screenlocked_x86 screenlocked_arm
+      - name: Create Archive
+        run: tar -czvf screenlocked-${{ github.ref_name }}.tar.gz screenlocked
+      - name: Install git-cliff
+        run: brew install git-cliff
+      - name: Generate Changelog
+        run: |
+          git fetch --tags --force
+          git cliff --unreleased --tag ${{ github.ref_name }} -o CHANGELOG.md
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: screenlocked-${{ github.ref_name }}.tar.gz
+          body_path: CHANGELOG.md # 直接使用生成的 Changelog
+      - name: Update Homebrew Tap
+        run: |
+          SHA256=$(shasum -a 256 screenlocked-${{ github.ref_name }}.tar.gz | awk '{print $1}')
+          git clone https://github.com/${{ github.repository_owner }}/homebrew-tap.git
+          cd homebrew-tap
+          mkdir -p Formula
+          cat > Formula/screenlocked.rb <<EOF
+          class Screenlocked < Formula
+            desc "Command-line utility to check macOS screen lock status"
+            homepage "https://github.com/${{ github.repository_owner }}/screenlocked"
+            url "https://github.com/${{ github.repository_owner }}/screenlocked/releases/download/${{ github.ref_name }}/screenlocked-${{ github.ref_name }}.tar.gz"
+            sha256 "$SHA256"
+            version "${{ github.ref_name }}"
+
+            def install
+              bin.install "screenlocked"
+            end
+          end
+          EOF
+          git add Formula/screenlocked.rb
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git commit -m "chore: update formula for ${{ github.ref_name }}"
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.PAT }}
+          repository: ${{ github.repository_owner }}/homebrew-tap
+          branch: master
