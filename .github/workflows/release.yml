@@ -58,9 +58,4 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git commit -m "chore: update formula for ${{ github.ref_name }}"
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.PAT }}
-          repository: ${{ github.repository_owner }}/homebrew-tap
-          branch: master
+          git push https://${{ github.repository_owner }}:${{ secrets.PAT }}@github.com/${{ github.repository_owner }}/homebrew-tap.git || exit 1
