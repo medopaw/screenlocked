@@ -44,10 +44,10 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Tag created and pushed: $version"
+sleep 0.1 # Prevent echo output from overlapping the read prompt
 
 # Offer to open the GitHub Actions URL in the default browser (Mac). Press y to open or Enter to exit.
 read -n 1 -p "Open GitHub Actions page? Press 'y' to open, or any other key to exit: " open_choice
-echo ""
 if [ "$open_choice" = "y" ] || [ "$open_choice" = "Y" ]; then
     open "https://github.com/medopaw/screenlocked/actions"
 fi
