@@ -35,6 +35,21 @@ while true; do
     fi
 done
 
+# Update the Swift version constant before tagging
+swift_file="screenlocked.swift"
+sed -i '' -E "s/(let VERSION = \").*(\")/\1$version\2/" "$swift_file"
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to update version constant in $swift_file"
+    exit 1
+fi
+
+# Commit the version change and push
+git add "$swift_file" && git commit -m "ci: update version constant to $version" && git push origin master
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to push version update commit"
+    exit 1
+fi
+
 # Execute git commands to create and push the tag
 git tag -a "$version" -m "Release $version" && git push origin --tags
 

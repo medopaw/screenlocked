@@ -2,6 +2,8 @@
 
 import Cocoa
 
+let VERSION = "v0.0.5"  // 初始版本
+
 // Status enum + exit code mapping
 enum LockStatus: Int32 {
     case locked = 0
@@ -18,6 +20,7 @@ func printHelp() {
     Options:
       -h, --help     Display this help message
       -p, --print    Print locked/unlocked status to stdout
+      -v, --version   Display version information
 
     Exit codes:
       Without -p/--print:
@@ -53,6 +56,10 @@ func printHelp() {
     print(help)
 }
 
+func printVersion() {
+    print(VERSION)
+}
+
 // Core detection logic
 func checkScreenLockStatus() -> LockStatus {
     guard let sessionDict = CGSessionCopyCurrentDictionary() as? [String: Any] else {
@@ -71,6 +78,9 @@ for arg in CommandLine.arguments.dropFirst() {
         exit(0)
     case "-p", "--print":
         printStatus = true
+    case "-v", "--version":
+        printVersion()
+        exit(0)
     default:
         fputs("Error: Invalid argument '\(arg)'\n", stderr)
         exit(LockStatus.error.rawValue)
