@@ -2,7 +2,7 @@
 
 import Cocoa
 
-let VERSION = "v0.0.6"
+let VERSION = "v0.0.7"
 
 // Status enum + exit code mapping
 enum LockStatus: Int32 {
