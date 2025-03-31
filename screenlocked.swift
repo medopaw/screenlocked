@@ -2,14 +2,14 @@
 
 import Cocoa
 
-// 状态枚举 + 退出码映射
+// Status enum + exit code mapping
 enum LockStatus: Int32 {
     case locked = 0
     case unlocked = 1
     case error = 2
 }
 
-// 帮助信息
+// Help information
 func printHelp() {
     let help = """
     Usage: screenlocked [OPTION]
@@ -53,7 +53,7 @@ func printHelp() {
     print(help)
 }
 
-// 核心检测逻辑
+// Core detection logic
 func checkScreenLockStatus() -> LockStatus {
     guard let sessionDict = CGSessionCopyCurrentDictionary() as? [String: Any] else {
         return .error
@@ -62,7 +62,7 @@ func checkScreenLockStatus() -> LockStatus {
     return isLocked ? .locked : .unlocked
 }
 
-// 解析参数
+// Parse arguments
 var printStatus = false
 for arg in CommandLine.arguments.dropFirst() {
     switch arg {
@@ -77,18 +77,18 @@ for arg in CommandLine.arguments.dropFirst() {
     }
 }
 
-// 执行检测并处理结果
+// Execute detection and handle result
 let status = checkScreenLockStatus()
 
-// 按需打印状态
+// Print status if needed
 if printStatus {
     switch status {
     case .locked: print("locked")
     case .unlocked: print("unlocked")
-    case .error: print("Error: Failed to detect screen lock status") // 错误时输出错误信息
+    case .error: print("Error: Failed to detect screen lock status") // Print error message if detection failed
     }
     exit(0)
 }
 
-// 返回对应的退出码
+// Return corresponding exit code
 exit(status.rawValue)

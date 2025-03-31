@@ -35,9 +35,13 @@ fi
 screenlocked --print
 
 # Use in a script condition
-if screenlocked --print | grep -q "locked"; then
+if screenlocked; then
+  # Do something when screen is locked
     echo "Do something when locked"
 fi
+
+# Combine with other tools
+screenlocked && say "Screen is locked" || say "Screen is unlocked"
 ```
 
 ## Installation
